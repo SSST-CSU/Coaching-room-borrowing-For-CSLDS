@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="zh-CN" id="html">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>个人信息</title>
+    <link href="{% static "css/bootstrap.min.css" %}" rel="stylesheet">
+
+    <!--[if lt IE 9]>
+      <script src="https://cdn.bootcss.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+      <script src="https://cdn.bootcss.com/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+</head>
+<body id="body">
+<button type="button" class="btn btn-default btn-lg" id="back" onclick="backtoindex()">返回</button>
+<div style="width: 100%;height: auto;margin-right: auto;margin-left: auto">
+    <form class="am-form" action="/changeinfo/" method="post">
+        {% csrf_token %}
+        <fieldset>
+            <div class="page-header">
+                <h1 align="center">软件学院学服活动室借用系统</h1>
+            </div>
+
+            <div class="form-group input-group-lg">
+                <label><h2>学号</h2></label>
+                <input type="text" class="form-control" id="id" name="id" placeholder="学号"
+                       aria-describedby="sizing-addon1" value="{{ id }}" readonly="readonly">
+            </div>
+
+            <div class="form-group input-group-lg">
+                <label><h2>姓名</h2></label>
+                <input type="text" class="form-control" id="name" name="name" placeholder="姓名"
+                       aria-describedby="sizing-addon1" value="{{ name }}" readonly="readonly">
+            </div>
+
+            <div class="form-group input-group-lg">
+                <label><h2>密码</h2></label>
+                <input type="password" class="form-control" id="pwd" name="pwd" placeholder="密码"
+                       aria-describedby="sizing-addon1" value="{{ pwd }}">
+            </div>
+
+            <div class="form-group input-group-lg">
+                <label for="tel"><h2>联系方式</h2></label>
+                <input type="text" class="form-control" id="tel" name="tel" placeholder="联系方式"
+                       aria-describedby="sizing-addon1" value="{{ tel }}">
+            </div>
+
+            <div class="form-group input-group-lg">
+                <label><h2>邮箱</h2></label>
+                <input type="text" class="form-control" id="mail" name="mail" placeholder="邮箱"
+                       aria-describedby="sizing-addon1" value="{{ mail }}">
+            </div>
+            <button type="submit" class="btn btn-default btn-block btn-lg" id="changeInfo">修改信息</button>
+        </fieldset>
+    </form>
+
+</div>
+<script src="{% static "js/jquery.js" %}"></script>
+<script src="{% static "js/bootstrap.js" %}"></script>
+</body>
+</html>
+<script>
+    
+    function backtoindex() {
+        history.back();
+    }
+    
+</script>

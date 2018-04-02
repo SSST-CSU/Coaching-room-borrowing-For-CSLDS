@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="zh-CN" id="html">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>借用申请</title>
+    <link href="{% static "css/bootstrap.min.css" %}" rel="stylesheet">
+
+    <!--[if lt IE 9]>
+      <script src="https://cdn.bootcss.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+      <script src="https://cdn.bootcss.com/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <style>
+
+        body {
+            padding-top: 0px;
+        }
+
+        th {
+            text-align:center;
+        }
+
+        td {
+            text-align:center;
+        }
+    </style>
+</head>
+<body>
+<button type="button" class="btn btn-default btn-lg btn-success" id="back" onclick="backtoindex()">返回</button>
+<div style="width: 100%;height: auto;margin-right: auto;margin-left: auto">
+    <div class="am-form">
+        <fieldset>
+        <div class="page-header" align="center"><h1>软件学院学服活动室借用系统</h1></div>
+
+        <div class="container summary">
+            <div class="row" id="summary-container">
+                <div class="col-md-6">
+                <div class="form-group">
+                    <h3>设置管理员</h3>
+                    <div style="height:300px;overflow-y:scroll;">
+                    <table class="table table-bordered table-hover col-md-5" id="admintable">
+                        <tr>
+                            <th class="col-md-2">学工号</th>
+                            <th class="col-md-1">姓名</th>
+                            <th class="col-md-1">管理</br>级别</th>
+                            <th class="col-md-2">操作</th>
+                        </tr>
+                        {% for a in admin %}{% if a.level > 0 %}
+                        <tr id="admin{{ a.user.id }}">
+                            <td>{{ a.user.id }}</td>
+                            <td>{{ a.user.name }}</td>
+                            <td id="level{{ a.user.id }}">{{ a.level }}</td>
+                            <td>
+                            {% if a.user.id == myself.id %}
+                                <button id="btn{{ a.user.id }}1" class="btn btn-default" data-toggle="modal" data-target="#{{ forloop.counter0 }}1" disabled="disabled">修改</button>
+                                <button id="btn{{ a.user.id }}2" class="btn btn-default" data-toggle="modal" data-target="#{{ forloop.counter0 }}2" disabled="disabled">删除</button>
+                            {% elif mylevel >= 3 or a.level < mylevel %}
+                                <button id="btn{{ a.user.id }}1" class="btn btn-default" data-toggle="modal" data-target="#{{ forloop.counter0 }}1">修改</button>
+                                <button id="btn{{ a.user.id }}2" class="btn btn-danger" data-toggle="modal" data-target="#{{ forloop.counter0 }}2">删除</button>
+                            {% else %}
+                                <button id="btn{{ a.user.id }}1" class="btn btn-default" data-toggle="modal" data-target="#{{ forloop.counter0 }}1" disabled="disabled">修改</button>
+                                <button id="btn{{ a.user.id }}2" class="btn btn-default" data-toggle="modal" data-target="#{{ forloop.counter0 }}2" disabled="disabled">删除</button>
+                            {% endif %}
+                            </td>
+                        </tr>
+                        <div id="{{ forloop.counter0 }}1" class="modal fade bs-example-modal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                    <h4 class="modal-title" id="myModalLabel">{{ a.user.name }}</h4>
+                                </div>
+
+                                <div class="modal-body">
+                                    <label>管理员级别</label>
+                                    <select id="select" class="form-control">{% if mylevel >= 2 %}
+                                        <option value="1">1</option>{% endif %}{% if mylevel >= 3 %}
+                                        <option value="2">2</option>
+                                        <option value="3">3</option>{% endif %}
+                                    </select>
+                                </div>
+
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="saveadmin('{{ a.user.id }}')">确定</button>
+                                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                                </div>
+                            </div>
+                        </div>
+                        </div>
+                        <div id="{{ forloop.counter0 }}2" class="modal fade bs-example-modal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                    <h4 class="modal-title" id="myModalLabel">{{ a.user.name }}</h4>
+                                </div>
+
+                                <div class="modal-body"><label>是否确认删除{{ a.user.name }}的管理员资格？</label></div>
+
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-danger" data-dismiss="modal" onclick="deleteAdmin('{{ a.user.id }}')">删除</button>
+                                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                                </div>
+                            </div>
+                        </div>
+                        </div>
+                        {% endif %}{% endfor %}
+                    </table>
+                    </div>
+                    </div>
+                    <button class="btn btn-default btn-block btn-lg" data-toggle="modal" data-target="#addAdminmodal">增加管理员</button>
+                    <div id="addAdminmodal" class="modal fade bs-example-modal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                    <h4 class="modal-title" id="myModalLabel">添加管理员</h4>
+                                </div>
+
+                                <div class="modal-body">
+                                    <div class="form-group input-group-lg">
+                                        <label for="adminid"><h3>学号</h3></label>
+                                        <input type="text" class="form-control" id="adminid" name="adminid"
+                                               placeholder="请输入需要添加的管理员的学号" aria-describedby="sizing-addon1" onchange="getInfo()">
+                                    </div>
+
+                                    <div class="form-group input-group-lg">
+                                        <label for="adminname"><h3>姓名</h3></label>
+                                        <input type="text" class="form-control" id="adminname" name="adminname"
+                                               placeholder="请先输入学号" aria-describedby="sizing-addon1" readonly="readonly">
+                                    </div>
+
+                                    <div class="form-group input-group-lg">
+                                        <label for="tel"><h3>管理员级别</h3></label>
+                                        <select id="adminLevelSelect" class="form-control" disabled="disabled">{% if mylevel >= 2 %}
+                                            <option value="1">1</option>{% endif %}{% if mylevel >= 3 %}
+                                            <option value="2">2</option>
+                                            <option value="3">3</option>{% endif %}
+                                    </select>
+                                    </div>
+                                </div>
+
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-primary" data-dismiss="modal"
+                                            disabled="disabled" id="btnAddAdmin" onclick="addAdmin()">添加</button>
+                                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                <div class="form-group">
+                <h3>普通用户管理</h3>
+                <div style="height:300px;overflow-y:scroll;">
+                <table class="table table-bordered table-hover col-md-5" id="usertable">
+                    <tr>
+                        <th>学工号</th>
+                        <th>姓名</th>
+                        <th>管理</br>级别</th>
+                        <th>操作</th>
+                    </tr>
+                    {% for u in alluser %}
+                    <tr id="user{{ u.user.id }}">
+                        <td>{{ u.user.id }}</td>
+                        <td>{{ u.user.name }}</td>
+                        <td>{{ u.level }}</td>
+                        <td>
+                            {% if u.user.id == myself.id or u.level >= mylevel %}
+                            <button id="btn{{ u.user.id }}11" class="btn btn-default" data-toggle="modal" data-target="#{{ forloop.counter0 }}11" disabled="disabled">修改</button>
+                            <button id="btn{{ u.user.id }}22" class="btn btn-default" data-toggle="modal" data-target="#{{ forloop.counter0 }}22" disabled="disabled">删除</button>{% else %}
+                            <button id="btn{{ u.user.id }}00" class="btn btn-default" data-toggle="modal" data-target="#{{ forloop.counter0 }}00">重置密码</button>
+                            <button id="btn{{ u.user.id }}11" class="btn btn-primary" data-toggle="modal" data-target="#{{ forloop.counter0 }}11">修改</button>
+                            <button id="btn{{ u.user.id }}22" class="btn btn-danger" data-toggle="modal" data-target="#{{ forloop.counter0 }}22">删除</button>{% endif %}
+                        </td>
+                    </tr>
+                    <div id="{{ forloop.counter0 }}00" class="modal fade bs-example-modal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                <h4 class="modal-title" id="myModalLabel">{{ u.user.name }}</h4>
+                            </div>
+
+                            <div class="modal-body">
+                                重置后密码将会为学号，是否继续？
+                            </div>
+
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="resetpwd('{{ u.user.id }}')">继续</button>
+                                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                            </div>
+                        </div>
+                    </div>
+                    </div>
+                    <div id="{{ forloop.counter0 }}11" class="modal fade bs-example-modal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                <h4 class="modal-title" id="myModalLabel">{{ u.user.name }}</h4>
+                            </div>
+
+                            <div class="modal-body">
+                            <div class="form-group input-group-lg">
+                                <label for="updateuserid{{ u.user.id }}"><h3>学号</h3></label>
+                                <input type="text" class="form-control" id="updateuserid{{ u.user.id }}" name="updateuserid{{ u.user.id }}"
+                                       placeholder="学号" aria-describedby="sizing-addon1" value="{{ u.user.id }}">
+                            </div>
+
+                            <div class="form-group input-group-lg">
+                                <label for="updateusername{{ u.user.id }}"><h3>姓名</h3></label>
+                                <input type="text" class="form-control" id="updateusername{{ u.user.id }}" name="updateusername{{ u.user.id }}"
+                                       placeholder="姓名" aria-describedby="sizing-addon1" value="{{ u.user.name }}">
+                            </div>
+
+                            <div class="form-group input-group-lg">
+                                <label for="updateusertel{{ u.user.id }}"><h3>联系方式</h3></label>
+                                <input type="text" class="form-control" id="updateusertel{{ u.user.id }}" name="updateusertel{{ u.user.id }}"
+                                       placeholder="联系方式" aria-describedby="sizing-addon1" value="{{ u.user.tel }}">
+                            </div>
+
+                            <div class="form-group input-group-lg">
+                                <label for="usermail{{ u.user.id }}"><h3>邮箱</h3></label>
+                                <input type="text" class="form-control" id="updateusermail{{ u.user.id }}" name="updateusermail{{ u.user.id }}"
+                                       placeholder="邮箱" aria-describedby="sizing-addon1" value="{{ u.user.mail }}">
+                            </div>
+                            </div>
+
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="update('{{ u.user.id }}')">确定</button>
+                                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                            </div>
+                        </div>
+                    </div>
+                    </div>
+                    <div id="{{ forloop.counter0 }}22" class="modal fade bs-example-modal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                <h4 class="modal-title" id="myModalLabel">{{ u.user.name }}</h4>
+                            </div>
+
+                            <div class="modal-body"><label>是否确认删除用户{{ u.user.id }}{{ u.user.name }}？</label></div>
+
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-danger" data-dismiss="modal" onclick="deleteUser('{{ u.user.id }}')">删除</button>
+                                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                            </div>
+                        </div>
+                    </div>
+                    </div>
+                    {% endfor %}
+                </table>
+                </div>
+            </div>
+            <button class="btn btn-default btn-block btn-lg" data-toggle="modal" data-target="#addUsermodal">增加用户</button>
+            <div id="addUsermodal" class="modal fade bs-example-modal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                            <h4 class="modal-title" id="myModalLabel">添加用户</h4>
+                        </div>
+
+                        <div class="modal-body">
+                            <div class="form-group input-group-lg">
+                                <label for="userid"><h3>学号</h3></label>
+                                <input type="text" class="form-control" id="userid" name="userid"
+                                       placeholder="学号" aria-describedby="sizing-addon1">
+                            </div>
+
+                            <div class="form-group input-group-lg">
+                                <label for="username"><h3>姓名</h3></label>
+                                <input type="text" class="form-control" id="username" name="username"
+                                       placeholder="姓名" aria-describedby="sizing-addon1">
+                            </div>
+
+                            <div class="form-group input-group-lg">
+                                <label for="usertel"><h3>联系方式</h3></label>
+                                <input type="text" class="form-control" id="usertel" name="usertel"
+                                       placeholder="联系方式" aria-describedby="sizing-addon1">
+                            </div>
+
+                            <div class="form-group input-group-lg">
+                                <label for="usermail"><h3>邮箱</h3></label>
+                                <input type="text" class="form-control" id="usermail" name="usermail"
+                                       placeholder="邮箱" aria-describedby="sizing-addon1">
+                            </div>
+                        </div>
+
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="addUser()">添加</button>
+                            <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="dtp_input2" class="control-label"><h3>设置开学时间</h3><span style="color: grey">星期天为一个星期的开始</span></label>
+                    <div id="datetimepicker" class="input-group date form_date" data-date="" data-date-format="yyyy-mm-dd">
+                        <input id="date" class="form-control" type="text" value="{{ year }}-{{ month }}-{{ day }}" readonly>
+                        <span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></span>
+                    </div>
+                    <input type="hidden" id="dtp_input2" value="" /><br/>
+                </div>
+
+                <button type="button" class="btn btn-default btn-block btn-lg" onclick="setday()">设置</button>
+                <div class="form-group">
+                    <h3>颜色设置</h3>
+                        <div class="form-group input-group-lg">
+                            <label>时间段已借用的颜色</label>
+                            <input type="text" class="form-control" id="backcolor" name="backcolor" placeholder="请以“#”开头，使用RGB16进制颜色属性"
+                               aria-describedby="sizing-addon1" value="{{ backcolor }}">
+                        </div>
+                    <button type="button" class="btn btn-default btn-block btn-lg" onclick="setColor()">设置</button>
+                </div>
+                <div class="form-group">
+                    <h3>系统操作日志</h3>
+                    <textarea class="form-control" rows="10" disabled="disabled">{{ log }}</textarea>
+                </div>
+                <div class="form-group">
+                    <h3>系统数据重置</h3>
+                    <button class="btn btn-danger btn-block btn-lg" data-toggle="modal" data-target="#resetsys">系统重置</button>
+                    <div id="resetsys" class="modal fade bs-example-modal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                <h3 class="modal-title" id="myModalLabel">系统数据重置</h3>
+                            </div>
+
+                            <div class="modal-body">
+                                <h2>此操作将删除所有的借用记录，适用于新学期开始的时候重置系统数据并设置新学期开始时间，请问确认要继续吗？</h2>
+                            </div>
+
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-danger btn-lg" data-dismiss="modal" onclick="resetsys()">新学期开始了</button>
+                                <button type="button" class="btn btn-primary btn-lg" data-dismiss="modal">不要重置</button>
+                            </div>
+                        </div>
+                    </div>
+                    </div>
+                </div>
+                </div>
+            </div>
+        </div>
+        </fieldset>
+    </div>
+</div>
+<script src="{% static "js/jquery.js" %}"></script>
+<script src="{% static "js/bootstrap.js" %}"></script>
+<script type="text/javascript" src="{% static "js/bootstrap-datetimepicker.js" %}" charset="UTF-8"></script>
+<script type="text/javascript" src="{% static "js/locales/bootstrap-datetimepicker.zh-CN.js" %}" charset="UTF-8"></script>
+<script type="text/javascript" src="{% static "js/locales/bootstrap-datetimepicker.fr.js" %}" charset="UTF-8"></script>
+</body>
+</html>
+<script>
+
+    function backtoindex() {
+        history.back();
+    }
+
+    $.ajaxSetup({
+        data: {csrfmiddlewaretoken: "{{ csrf_token }}" },
+    });
+
+    function setday() {
+        var date = $("#date").val();
+        var year = parseInt(date.substr(0, 4));
+        var month = parseInt(date.substr(5, 2));
+        var day = parseInt(date.substr(8, 4));
+        var dateInfo = new Date(year, month-1, day);
+        if(dateInfo.getDay() != 0) {
+            alert("每个星期开始的第一天为星期日，请重新输入");
+        } else {
+            $.ajax({
+                url: "/setday/",
+                type: "POST",
+                data: {
+                    adminid: "{{ myself.id }}",
+                    year:year,
+                    month:month,
+                    day:day
+                },
+                success:function(callback){
+                    var callback_dict = $.parseJSON(callback);
+                    if(callback_dict.msg == -1) {
+                        alert("每个星期开始的第一天为星期日，请重新输入");
+                    } else if(callback_dict.msg == 0) {
+                        alert("设置失败，请重试");
+                    }
+                }
+            })
+        }
+    }
+
+    $("#datetimepicker").datetimepicker({
+        language: "zh-CN",
+        weekStart: 0,
+        todayBtn:  1,
+		autoclose: 1,
+		todayHighlight: 1,
+		startView: 2,
+		minView: 2,
+		forceParse: 0
+    });
+    
+    function setColor() {
+        var color = $("#backcolor").val();
+        var f = color[0];
+        var r = color[1];
+        var g = color[2];
+        var b = color[3];
+        if(color.length > 4) {
+            alert("输入不规范，请重新输入");
+        } else if(f != "#"){
+            alert("请以“#”开头");
+        } else if(!(((r <= 9) && (r >= 0)) || (r >= 'a' && r <= 'f') || (r >= 'A' && r <= 'F'))) {
+            alert("红色数值不符合要求，请使用十六进制");
+        } else if(!(((g <= 9) && (g >= 0)) || (g >= 'a' && g <= 'f') || (g >= 'A' && g <= 'F'))) {
+            alert("绿色数值不符合要求，请使用十六进制");
+        } else if(!(((b <= 9) && (b >= 0)) || (b >= 'a' && b <= 'f') || (b >= 'A' && b <= 'F'))) {
+            alert("蓝色数值不符合要求，请使用十六进制");
+        } else {
+            $.ajax({
+                url: "/setcolor/",
+                type: "POST",
+                data: {
+                    color: color,
+                    adminid: "{{ myself.id }}",
+                },
+                success:function(callback){
+                    var callback_dict = $.parseJSON(callback);
+                    if(callback_dict.msg == 0) {
+                        alert("设置失败，请重试");
+                    }
+                }
+            })
+        }
+    }
+
+    function deleteAdmin(id) {
+        $.ajax({
+            url: "/deleteAdmin/",
+            type: "POST",
+            data: {
+                id: id,
+                adminid: "{{ myself.id }}",
+            },
+            success:function(callback){
+                var callback_dict = $.parseJSON(callback);
+                if(callback_dict.msg == 0) {
+                    alert("操作失败，请重试");
+                } else {
+                    $("#admin" + id).hide();
+                }
+            }
+        })
+    }
+
+    function getInfo() {
+        var id = $("#adminid").val();
+        document.getElementById("adminname").placeholder = "正在查找该用户";
+        document.getElementById("adminLevelSelect").disabled = "disabled";
+        document.getElementById("btnAddAdmin").disabled = "disabled";
+        $.ajax({
+            url: "/getInfoById/",
+            type: "POST",
+            data: {
+                id: id,
+            },
+            success:function(callback){
+                var callback_dict = $.parseJSON(callback);
+                if(callback_dict.msg == 0) {
+                    document.getElementById("adminname").placeholder = "此用户不存在，请重新输入学号";
+                } else if(callback_dict.msg == 1){
+                    var name = callback_dict.name;
+                    document.getElementById("adminname").placeholder = name;
+                    document.getElementById("adminLevelSelect").disabled = "";
+                    document.getElementById("btnAddAdmin").disabled = "";
+                } else if(callback_dict.msg == 2){
+                    var name = callback_dict.name;
+                    var level = callback_dict.level;
+                    document.getElementById("adminname").placeholder = name;
+                    if(level < "{{ mylevel }}") {
+                        document.getElementById("adminLevelSelect").value = level.toString();
+                        document.getElementById("adminLevelSelect").disabled = "";
+                        document.getElementById("btnAddAdmin").disabled = "";
+                    } else {
+                        alert("管理权限不够，无法继续操作");
+                        document.getElementById("adminid").value = "";
+                    }
+                }
+            }
+        })
+    }
+
+    function saveadmin(id) {
+        var level = $("#select").val();
+        $.ajax({
+            url: "/saveadmin/",
+            type: "POST",
+            data: {
+                id: id,
+                level: level,
+                adminid: "{{ myself.id }}",
+            },
+            success:function(callback){
+                var callback_dict = $.parseJSON(callback);
+                if(callback_dict.msg == 0) {
+                    alert("操作失败，请重试");
+                } else {
+                    document.getElementById("level" + id).innerText = level;
+                }
+            }
+        })
+    }
+
+    function addAdmin() {
+        var id = $("#adminid").val();
+        var level = $("#adminLevelSelect").val();
+        $.ajax({
+            url: "/addAdmin/",
+            type: "POST",
+            data: {
+                id: id,
+                level: level,
+                adminid: "{{ myself.id }}",
+            },
+            success:function(callback){
+                var callback_dict = $.parseJSON(callback);
+                if(callback_dict.msg == 0) {
+                    alert("操作失败，请重试");
+                } else if(callback_dict.msg == 2) {
+                    document.getElementById("level" + id).innerText = level;
+                } else {
+                    /*
+                    var tb = document.getElementById("admintable");
+                    var newTr = tb.insertRow();//添加新行，trIndex就是要添加的位置
+                    var cell1 = newTr.insertCell();
+                    var cell2 = newTr.insertCell();
+                    var cell3 = newTr.insertCell();
+                    var cell4 = newTr.insertCell();
+                    cell1.innerHTML = id;
+                    cell2.innerHTML = callback_dict.name;
+                    cell3.innerHTML = level;
+                    */
+                    location.reload();
+                }
+            }
+        })
+    }
+
+    function addUser() {
+        var id = $("#userid").val();
+        var name = $("#username").val();
+        var tel = $("#usertel").val();
+        var mail = $("#usermail").val();
+        $.ajax({
+            url: "/addUser/",
+            type: "POST",
+            data: {
+                id: id,
+                name: name,
+                tel: tel,
+                mail: mail,
+                adminid: "{{ myself.id }}",
+            },
+            success: function (callback) {
+                var callback_dict = $.parseJSON(callback);
+                if(callback_dict.msg == 0) {
+                    alert("操作失败，请重试");
+                } else {
+                    location.reload();
+                }
+            }
+        })
+    }
+
+    function resetpwd(id) {
+        $.ajax({
+            url: "/resetpwd/",
+            type: "POST",
+            data: {
+                id: id,
+                adminid: "{{ myself.id }}",
+            },
+            success:function(callback){
+                var callback_dict = $.parseJSON(callback);
+                if(callback_dict.msg == 0) {
+                    alert("操作失败，请重试");
+                }
+            }
+        })
+    }
+
+    function deleteUser(id) {
+        $.ajax({
+            url: "/deleteUser/",
+            type: "POST",
+            data: {
+                id: id,
+                adminid: "{{ myself.id }}",
+            },
+            success:function(callback){
+                var callback_dict = $.parseJSON(callback);
+                if(callback_dict.msg == 0) {
+                    alert("操作失败，请重试");
+                } else {
+                    $("#user" + id).hide();
+                }
+            }
+        })
+    }
+
+    function update(id) {
+        var userid = $("#updateuserid" + id).val();
+        var name = $("#updateusername" + id).val();
+        var tel = $("#updateusertel" + id).val();
+        var mail = $("#updateusermail" + id).val();
+        $.ajax({
+            url: "/updateUser/",
+            type: "POST",
+            data: {
+                nid: userid,
+                id: id,
+                name: name,
+                tel: tel,
+                mail: mail,
+                adminid: "{{ myself.id }}",
+            },
+            success:function(callback){
+                var callback_dict = $.parseJSON(callback);
+                if(callback_dict.msg == 0) {
+                    alert("操作失败，请重试");
+                } else {
+                    location.reload();
+                }
+            }
+        })
+    }
+
+    function resetsys() {
+        $.ajax({
+            url: "/resetsys/",
+            type: "POST",
+            data: {
+                adminid: "{{ myself.id }}"
+            },
+            success:function(callback){
+                var callback_dict = $.parseJSON(callback);
+                if(callback_dict.msg == 0) {
+                    alert("操作失败，请重试");
+                } else {
+                    window.location = "/";
+                }
+            }
+        })
+    }
+
+</script>

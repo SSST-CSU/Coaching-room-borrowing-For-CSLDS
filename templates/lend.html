@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="zh-CN" id="html">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>借用申请</title>
+    <link href="{% static "css/bootstrap.min.css" %}" rel="stylesheet">
+
+    <!--[if lt IE 9]>
+      <script src="https://cdn.bootcss.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+      <script src="https://cdn.bootcss.com/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <style>
+
+        body {
+            padding-top: 0px;
+        }
+
+    </style>
+</head>
+<body>
+<button type="button" class="btn btn-default btn-lg btn-success" id="back" onclick="backtoindex()">返回</button>
+<div style="width: 100%;height: auto;margin-right: auto;margin-left: auto">
+    <div class="am-form">
+        <fieldset>
+            <div class="page-header" align="center"><h1>软件学院学服活动室借用系统</h1></div>
+<!--
+            <div class="form-group input-group-lg">
+                <label><h2>借用申请列表</h2></label>
+            </div>
+-->
+            <div class="form-group input-group-lg">
+                <table class="table table-bordered table-hover">
+                    <tr>
+                        <th class="col-md-2">提交时间</th>
+                        <th class="col-md-2">使用时间</th>
+                        <th class="col-md-1">申请人</th>
+                        <th class="col-md-1">使用人数</th>
+                        <th class="col-md-2">使用单位</th>
+                        <th class="col-md-2">使用用途</th>
+                        <th class="col-md-2">申请状态</th>
+                    </tr>
+                    {% for br in brrcd %}
+                    <tr>
+                        <td>{{ br.applydatetime }}</td>
+                        <td>{{ br.date }}，{% if br.time == 0 %}1-2
+                            {% elif br.time == 1 %}3-4
+                            {% elif br.time == 2 %}5-6
+                            {% elif br.time == 3 %}7-8
+                            {% elif br.time == 4 %}9-10{% endif %}节</td>
+                        <td>{{ br.user.name }}</td>
+                        <td>{{ br.num }}</td>
+                        <td>{{ br.com }}</td>
+                        <td>{{ br.usereason }}</td>
+                        <td>
+                            <button data-toggle="modal" data-target="#{{ forloop.counter0 }}" id="btn{{ br.user.id }}{{ br.date }}{{ br.time }}"
+                                {% if br.stat == "申请中" %}
+                                    class="btn btn-primary"
+                                {% elif br.stat == "同意申请" %}
+                                    class="btn btn-success"
+                                {% else %}
+                                    class="btn btn-danger"
+                                {% endif %}
+                            >{{ br.stat }}</button>
+                        </td>
+                    </tr>
+                    <div id="{{ forloop.counter0 }}" class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel">
+                        <div class="modal-dialog modal-lg" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                    <h4 class="modal-title" id="myModalLabel">{{ br.applydatetime }} {{ br.user.name }}的申请</h4>
+                                </div>
+
+                                <div class="modal-body">
+                                    <label><h2>申请状态</h2></label>
+                                    <select id="select{{ br.date }}{{ br.time }}{{ br.user.id }}" class="form-control">
+                                        <option value="申请中">申请中</option>
+                                        <option value="同意申请">同意申请</option>
+                                        <option value="拒绝申请">拒绝申请</option>
+                                    </select>
+                                </div>
+
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-primary" data-dismiss="modal"
+                                            onclick="statchange('{{ br.user.id }}', '{{ br.date }}', '{{ br.time }}')">确定</button>
+                                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </table>
+            </div>
+        </fieldset>
+    </div>
+</div>
+<script src="{% static "js/jquery.js" %}"></script>
+<script src="{% static "js/bootstrap.js" %}"></script>
+</body>
+</html>
+<script>
+
+    $.ajaxSetup({
+        data: {csrfmiddlewaretoken: "{{ csrf_token }}" },
+    });
+
+    function backtoindex() {
+        history.back();
+    }
+
+    function statchange(id, date, time) {
+        var stat = $("#select" + date + time + id).val();
+
+        $.ajax({
+            url: "/lend/",
+            type: "POST",
+            data: {
+                date:date,
+                time:time,
+                userid:id,
+                stat:stat,
+                adminid: "{{ myid }}",
+            },
+            success:function(callback){
+                var callback_dict = $.parseJSON(callback);
+                if(callback_dict.msg == 1) {
+                    if(stat == "申请中") {
+                        document.getElementById("btn" + id + date + time).className = "btn btn-primary";
+                        document.getElementById("btn" + id + date + time).innerText = "申请中";
+                    } else if(stat == "同意申请") {
+                        document.getElementById("btn" + id + date + time).className = "btn btn-success";
+                        document.getElementById("btn" + id + date + time).innerText = "同意申请";
+                    } else {
+                        document.getElementById("btn" + id + date + time).className = "btn btn-danger";
+                        document.getElementById("btn" + id + date + time).innerText = "拒绝申请";
+                    }
+                } else {
+                    alert("操作失败，请重试");
+                }
+            }
+        })
+    }
+
+</script>

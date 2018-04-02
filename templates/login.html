@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="zh-CN" id="html">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>登录</title>
+    <link href="{% static "css/bootstrap.min.css" %}" rel="stylesheet">
+
+    <!--[if lt IE 9]>
+      <script src="https://cdn.bootcss.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+      <script src="https://cdn.bootcss.com/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <style>
+
+        body {
+            padding-top: 50px;
+        }
+
+    </style>
+</head>
+<body>
+
+<div style="width: 100%;height: auto;margin-right: auto;margin-left: auto">
+
+    <form class="am-form" action="/login/" method="post">
+    {% csrf_token %}
+        <fieldset>
+            <div class="page-header" align="center"><h1>软件学院学服活动室借用系统</h1></div>
+
+            <div class="form-group input-group-lg">
+                <label for="id"><h2>学号</h2></label>
+
+                <input type="text" class="form-control" id="id" name="id" placeholder="学号" aria-describedby="sizing-addon1">
+            </div>
+
+            <div class="form-group input-group-lg">
+                <label for="password"><h2>密码</h2></label>
+                <input type="password" class="form-control" id="pwd" name="pwd" placeholder="密码" aria-describedby="sizing-addon1">
+            </div>
+            <button type="submit" class="btn btn-default btn-block btn-lg">登录</button>
+        </fieldset>
+    </form>
+
+</div>
+
+<script src="{% static "js/jquery.js" %}"></script>
+<script src="{% static "js/bootstrap.min.js" %}"></script>
+</body>
+</html>

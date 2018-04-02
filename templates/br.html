@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="zh-CN" id="html">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>借用申请</title>
+    <link href="{% static "css/bootstrap.min.css" %}" rel="stylesheet">
+
+    <!--[if lt IE 9]>
+      <script src="https://cdn.bootcss.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+      <script src="https://cdn.bootcss.com/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <style>
+
+        body {
+            padding-top: 0px;
+        }
+
+    </style>
+</head>
+<body>
+<button type="button" class="btn btn-default btn-lg" id="back" onclick="backtoindex()">返回</button>
+<div style="width: 100%;height: auto;margin-right: auto;margin-left: auto">
+    <form class="am-form">
+        <fieldset>
+            <div class="page-header" align="center"><h1>软件学院学服活动室借用系统</h1></div>
+            <div class="form-group input-group-lg">
+                <label><h2>借用人<span style="color: red">*</span></h2></label>
+                <input type="text" class="form-control" id="name" name="name" placeholder="姓名"
+                       aria-describedby="sizing-addon1" value="{{ user.name }}" readonly="readonly">
+            </div>
+
+            <div class="form-group input-group-lg">
+                <label><h2>联系方式<span style="color: red">*</span></h2></label>
+                <input type="text" class="form-control" id="tel" name="tel" placeholder="联系方式"
+                       aria-describedby="sizing-addon1" {% if user.tel != "None" %}value="{{ user.tel }}"{% endif %} readonly="readonly">
+            </div>
+
+            <div class="form-group input-group-lg">
+                <label><h2>邮箱<span style="color: red">*</span></h2></label>
+                <input type="text" class="form-control" id="mail" name="mail" placeholder="邮箱"
+                       aria-describedby="sizing-addon1" {% if user.mail != "None" %}value="{{ user.mail }}"{% endif %} readonly="readonly">
+            </div>
+
+            <div class="form-group input-group-lg">
+                <label><h2>使用人数<span style="color: red">*</span></h2></label>
+                <input type="text" class="form-control" id="num" name="num" placeholder="使用人数（3-20人）" aria-describedby="sizing-addon1">
+            </div>
+
+            <div class="form-group input-group-lg">
+                <label><h2>使用单位</h2></label>
+                <input type="text" class="form-control" id="com" name="com" placeholder="使用单位（若个人申请可填“无”）" aria-describedby="sizing-addon1">
+            </div>
+
+            <div class="form-group input-group-lg">
+                <label><h2>使用用途<span style="color: red">*</span></h2></label>
+                <input type="text" class="form-control" id="use" name="use" placeholder="使用用途（学习交流、会议或者其他活动）" aria-describedby="sizing-addon1">
+            </div>
+
+            <div class="form-group input-group-lg">
+                <label><h2>周数</h2></label>
+                <select id="weekselect" class="form-control" onchange="weekchange()">
+                    {% for w in weeks %}
+                    <option id="w{{ w }}" value="{{ w }}">{{ w }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group input-group-lg">
+                <label><h2>借用时间（点击表格中空白时间段完成借用申请）</h2></label>
+            </div>
+
+            <div class="form-group input-group-lg">
+                <table class="table table-bordered table-hover">
+                    <tr>
+                        <th rowspan="2">#</th>
+                        <th id=0></th>
+                        <th id=1></th>
+                        <th id=2></th>
+                        <th id=3></th>
+                        <th id=4></th>
+                        <th id=5></th>
+                        <th id=6></th>
+                    </tr>
+
+                    <tr>
+                        <th>星期日</th>
+                        <th>星期一</th>
+                        <th>星期二</th>
+                        <th>星期三</th>
+                        <th>星期四</th>
+                        <th>星期五</th>
+                        <th>星期六</th>
+                    </tr>
+
+                    <tr>
+                        <td>1-2</td>
+                        <td id="00" onclick="select('00')"></td>
+                        <td id="10" onclick="select('10')"></td>
+                        <td id="20" onclick="select('20')"></td>
+                        <td id="30" onclick="select('30')"></td>
+                        <td id="40" onclick="select('40')"></td>
+                        <td id="50" onclick="select('50')"></td>
+                        <td id="60" onclick="select('60')"></td>
+                    </tr>
+
+                    <tr>
+                        <td>3-4</td>
+                        <td id="01" onclick="select('01')"></td>
+                        <td id="11" onclick="select('11')"></td>
+                        <td id="21" onclick="select('21')"></td>
+                        <td id="31" onclick="select('31')"></td>
+                        <td id="41" onclick="select('41')"></td>
+                        <td id="51" onclick="select('51')"></td>
+                        <td id="61" onclick="select('61')"></td>
+                    </tr>
+
+                    <tr>
+                        <td>5-6</td>
+                        <td id="02" onclick="select('02')"></td>
+                        <td id="12" onclick="select('12')"></td>
+                        <td id="22" onclick="select('22')"></td>
+                        <td id="32" onclick="select('32')"></td>
+                        <td id="42" onclick="select('42')"></td>
+                        <td id="52" onclick="select('52')"></td>
+                        <td id="62" onclick="select('62')"></td>
+                    </tr>
+
+                    <tr>
+                        <td>7-8</td>
+                        <td id="03" onclick="select('03')"></td>
+                        <td id="13" onclick="select('13')"></td>
+                        <td id="23" onclick="select('23')"></td>
+                        <td id="33" onclick="select('33')"></td>
+                        <td id="43" onclick="select('43')"></td>
+                        <td id="53" onclick="select('53')"></td>
+                        <td id="63" onclick="select('63')"></td>
+                    </tr>
+
+                    <tr>
+                        <td>9-10</td>
+                        <td id="04" onclick="select('04')"></td>
+                        <td id="14" onclick="select('14')"></td>
+                        <td id="24" onclick="select('24')"></td>
+                        <td id="34" onclick="select('34')"></td>
+                        <td id="44" onclick="select('44')"></td>
+                        <td id="54" onclick="select('54')"></td>
+                        <td id="64" onclick="select('64')"></td>
+                    </tr>
+
+                </table>
+            </div>
+        </fieldset>
+    </form>
+</div>
+<script src="{% static "js/jquery.js" %}"></script>
+<script src="{% static "js/bootstrap.js" %}"></script>
+</body>
+</html>
+<script>
+
+    $.ajaxSetup({
+        data: {csrfmiddlewaretoken: "{{ csrf_token }}" },
+    });
+
+    window.onload = function () {
+        var name = "{{ user.name }}";
+        var tel = "{{ user.tel }}";
+        var mail = "{{ user.mail }}";
+        if(name == "" || tel == "" || mail == "") {
+            alert("请完善个人信息");
+            history.back();
+        } else {
+            var week = document.getElementById("weekselect").value;
+            $.ajax({
+                url: "/weekchange/",
+                type: "POST",
+                data: {week:week},
+                success:function(callback){
+                var callback_dict = $.parseJSON(callback);
+                for(var index = 0; index < 7; index++) {
+                    var label = document.getElementById(index);
+                    label.innerText = callback_dict.days[index].month + "月" + callback_dict.days[index].day + "日";
+                    for(var i = 0; i < 5; i++) {
+                        var td = document.getElementById(index.toString() + i.toString());
+                        if(callback_dict.days[index].time[i] == "同意申请") {
+                            td.style.backgroundColor = "{{ backcolor }}";
+                        } else {
+                            td.style.backgroundColor = "";
+                        }
+                    }
+                }
+            }
+            })
+        }
+    }
+
+    function weekchange() {
+        var week = document.getElementById("weekselect").value;
+        $.ajax({
+            url: "/weekchange/",
+            type: "POST",
+            data: {week:week},
+            success:function(callback){
+                var callback_dict = $.parseJSON(callback);
+                for(var index = 0; index < 7; index++) {
+                    var label = document.getElementById(index);
+                    label.innerText = callback_dict.days[index].month + "月" + callback_dict.days[index].day + "日";
+                    for(var i = 0; i < 5; i++) {
+                        var td = document.getElementById(index.toString() + i.toString());
+                        if(callback_dict.days[index].time[i] == "同意申请") {
+                            td.style.backgroundColor = "{{ backcolor }}";
+                        } else {
+                            td.style.backgroundColor = "";
+                        }
+                    }
+                }
+            }
+        })
+    }
+
+    var reg = /^#([0-9a-fA-f]{3}|[0-9a-fA-f]{6})$/;
+
+    String.prototype.colorHex = function(){
+        var that = this;
+        if(/^(rgb|RGB)/.test(that)) {
+            var aColor = that.replace(/(?:\(|\)|rgb|RGB)*/g,"").split(",");
+            var strHex = "#";
+            for(var i=0; i<aColor.length; i++) {
+                var hex = Number(aColor).toString(16);
+                if(hex === "0") {
+                    hex += hex;
+                }
+                strHex += hex;
+            }
+            if(strHex.length !== 7){
+                strHex = that;
+            }
+            return strHex;
+        } else if(reg.test(that)) {
+            var aNum = that.replace(/#/,"").split("");
+            if(aNum.length === 6){
+                return that;
+            }else if(aNum.length === 3) {
+                var numHex = "#";
+                for(var i=0; i<aNum.length; i+=1) {
+                    numHex += (aNum+aNum);
+                }
+                return numHex;
+            }
+        } else {
+            return that;
+        }
+    };
+
+    String.prototype.colorRgb = function(){
+        var sColor = this.toLowerCase();
+        if(sColor && reg.test(sColor)){
+            if(sColor.length === 4){
+                var sColorNew = "#";
+                for(var i=1; i<4; i+=1){
+                    sColorNew += sColor.slice(i,i+1).concat(sColor.slice(i,i+1));
+                }
+                sColor = sColorNew;
+            }
+            var sColorChange = [];
+            for(var i=1; i<7; i+=2){
+                sColorChange.push(parseInt("0x"+sColor.slice(i,i+2)));
+            }
+            return "rgb(" + sColorChange.join(", ") + ")";
+        } else {
+            return sColor;
+        }
+    };
+
+    function select(id) {
+        var td = document.getElementById(id.toString());
+        var num = document.getElementById("num").value;
+        var use = document.getElementById("use").value;
+        var com = document.getElementById("com").value;
+        if(td.style.backgroundColor == String("{{ backcolor }}").colorRgb()) {
+            alert("此时段已借用，无法申请");
+        } else if(num == "" || use == "") {
+            alert("请完善借用信息后再选择借用时段");
+        } else if(parseInt(num) > 20) {
+            alert("使用人数不能超过20人");
+        } else if(parseInt(num) < 3) {
+            alert("使用人数应该至少3人");
+        } else {
+            var week = document.getElementById("weekselect").value;
+            $.ajax({
+                url: "/borrow/",
+                type: "POST",
+                data: {
+                    userid: "{{ user.id }}",
+                    week: week,
+                    time: id[1],
+                    date: id[0],
+                    num: num,
+                    use: use,
+                    com: com
+                },
+                success:function(callback){
+                    var callback_dict = $.parseJSON(callback);
+                    var msg = callback_dict.msg;
+                    if(msg == 0) {
+                        alert("借用失败，请重试")
+                    } else {
+                        alert("已发送申请，请等待管理员审核");
+                    }
+                }
+            })
+        }
+    }
+
+    function backtoindex() {
+        history.back();
+    }
+
+</script>
+
